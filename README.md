@@ -1,5 +1,6 @@
 # distsys-projekt2
 Master - Worker architecture
+
 constraints: asnycio, aiohttp, pandas, Python standard library
 
 Client: 
@@ -16,10 +17,14 @@ Master (async):
 - Receive incoming request data from client
 - Extract the first 1000 lines of data (3 for now)
 - Listen for workers to say HELLO!
+- 
 ... to do ...
+
 - Send the first 1000 (3 for now) lines to worker 1
 - Send the next 1000 (3 for now) lines to worker 2
+
 ... to do ....
+
 
 
 Workers:

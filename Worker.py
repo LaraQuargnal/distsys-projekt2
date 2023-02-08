@@ -17,10 +17,11 @@ async def receive_data(request):
     # Simulate a random delay in receiving the file
     await asyncio.sleep(random.uniform(0.1, 0.3))
 
-    # Receive the 10 lines from Master
+    # Receive the 10 lines from server 2
     data = await request.json()
 
-    # print(data)
+    # Print the lines
+    print(data)
 
     # Count the number of words in the file
     async def count_words(text: str) -> int:
@@ -31,7 +32,7 @@ async def receive_data(request):
     word_count = await count_words(data)
     print(f"Word count: {word_count}")
 
-    # Send the word count back to Master
+    # Send the word count back to server 2
     async with aiohttp.ClientSession() as session:
         await asyncio.sleep(random.uniform(0.1, 0.3))  # Simulate a random delay in sending the results back
         await session.post("http://localhost:8081/receive_word_count", json={"word_count": word_count})

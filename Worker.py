@@ -1,58 +1,43 @@
-import json
-import pandas as pd
+import aiohttp
+import asyncio
+from aiohttp import web
 import re
 import string
-import asyncio
 import random
-from aiohttp import web
-
-# async function to simulate delay
-async def random_delay(delay: float):
-    await asyncio.sleep(delay)
-
-# async function to count the words
-async def count_words(text: str) -> int:
-    await asyncio.sleep(0)  # Simulate an async operation
-    words = re.sub("[" + string.punctuation + "]", "", text).split()
-    return len(words)
 
 routes = web.RouteTableDef()
 
+@routes.get("/worker_ready")
+async def worker_ready(request):
+    return web.Response(status=200)
 
-@routes.post("/")
-async def worker(req):
-    try:
-        # simulate delay in receiving the file
-        delay = random.uniform(0.1, 0.3)
-        print(f"Waiting for {delay} seconds")
-        await random_delay(delay)
+@routes.post("/receive_data")
+async def receive_data(request):
 
-        # count the number of words in the received file
-        data = await req.json()
-        text = data.get("data")
-        word_count = await count_words(text)
-        print(f"Word count: {word_count}")
+    # Simulate a random delay in receiving the file
+    await asyncio.sleep(random.uniform(0.1, 0.3))
 
-        # simulate delay in sending the result
-        delay = random.uniform(0.1, 0.3)
-        print(f"Waiting for {delay} seconds")
-        await random_delay(delay)
+    # Receive the 10 lines from Master
+    data = await request.json()
 
-        # send the result back to the master
-        print("Sending result")
-        return web.json_response({
-            "name": "worker",
-            "status": "OK",
-            "word_count": word_count
-        }, status=200)
-    except Exception as e:
-        return web.json_response({
-            "name": "worker",
-            "error": str(e)
-        }, status=500)
+    # print(data)
 
+    # Count the number of words in the file
+    async def count_words(text: str) -> int:
+        await asyncio.sleep(0)  # Simulate an async operation
+        words = re.sub("[" + string.punctuation + "]", "", str(text)).split()
+        return len(words)
+
+    word_count = await count_words(data)
+    print(f"Word count: {word_count}")
+
+    # Send the word count back to Master
+    async with aiohttp.ClientSession() as session:
+        await asyncio.sleep(random.uniform(0.1, 0.3))  # Simulate a random delay in sending the results back
+        await session.post("http://localhost:8081/receive_word_count", json={"word_count": word_count})
+
+    return web.Response(status=200)
 
 app = web.Application()
-app.router.add_routes(routes)
-
-web.run_app(app, port=8082)
+app.add_routes(routes)
+web.run_app(app, port=8083)  

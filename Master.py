@@ -1,56 +1,67 @@
 import aiohttp
-import asyncio
 from aiohttp import web
+import random
 
 routes = web.RouteTableDef()
+
 
 @routes.post("/send_data")
 async def receive_data(request):
     # Receive incoming request data from client
     data = await request.json()
 
-    # Print the data
-    print(data)
+    # Extract all the lines of data from Json
+    lines_of_data = list(data.values())
 
-    # Extract the first 3 lines of data
-    data_to_send = list(data.values())[:3]
+    # List of worker ports
+    worker_ports = [8083, 8084, 8085, 8086, 8087]
 
-    #    return web.Response(status=200)
-
-    # Listen for workers (server 3, server 4, server 5)
-    workers = []
+    # Listen for signals from the worker nodes if they are ready
+    workers = {}
     async with aiohttp.ClientSession() as session:
-        async with session.get("http://localhost:8083/worker_ready") as resp:
-            if resp.status == 200:
-                workers.append("server3")
-        async with session.get("http://localhost:8084/worker_ready") as resp:
-            if resp.status == 200:
-                workers.append("server4")
-        # async with session.get("http://localhost:8085/worker_ready") as resp:
-        #     if resp.status == 200:
-        #         workers.append("server5")
-
-    print(f"Received worker ready signals from: {workers}")
-    # return web.Response(text="Data received")
-
-    if "server3" in workers:
-        # Send the first 3 lines to server 3
-        async with aiohttp.ClientSession() as session:
-            async with session.post("http://localhost:8083/receive_data", json=data_to_send) as resp:
+        for port in worker_ports:
+            async with session.get(f"http://localhost:{port}/worker_ready") as resp:
                 if resp.status == 200:
-                    print("Sent data to server 3")
+                    # If a worker is ready, add it to the list of workers
+                    worker_id = f"server{port}"
+                    workers[worker_id] = port
+        print(f"Received worker ready signals from: {list(workers.keys())}")
 
-    # Extract the next 3 lines of data
-    data_to_send = list(data.values())[3:6]
+        # Select 3 to 5 workers randomly
+        selected_worker_ids = random.sample(list(workers.keys()), random.randint(3, 5))
+        print(f"Selected workers: {selected_worker_ids}")
 
-    if "server4" in workers:
-        # Send the next 3 lines to server 4
-        async with aiohttp.ClientSession() as session:
-            async with session.post("http://localhost:8084/receive_data", json=data_to_send) as resp:
-                if resp.status == 200:
-                    print("Sent data to server 4")
+        # Send data to selected workers
+        if workers:
+            while lines_of_data:
+                async with aiohttp.ClientSession() as session:
+                    for worker_id in selected_worker_ids:
+                        port = workers[worker_id]
+                        index = worker_ports.index(port)
+                        data_to_send = lines_of_data[index * 3: index * 3 + 3]
+                        if data_to_send: # Check if data_to_send is not empty
+                            await session.post(f"http://localhost:{port}/receive_data", json={"data": data_to_send, "worker_id": worker_id})
+                        lines_of_data = lines_of_data[3:]
+        else:
+            print("No workers are ready")
 
+        # If all data has been sent, print a message
+        if not lines_of_data:
+            print("No more data to send")
+
+    # Return a response to the client indicating that the data has been received
     return web.Response(text="Data received")
+
+# Define a dictionary to store the word counts received from the worker nodes
+word_counts = {}
+
+
+@routes.post("/receive_worker_word_count")
+async def receive_word_count(request):
+    # Receive the word count data from the worker node
+    data = await request.json()
+    print(f"Received word count from {data['worker_port']}: {data['word_count']}")
+    return web.Response(status=200)
 
 app = web.Application()
 app.add_routes(routes)

@@ -17,11 +17,12 @@ Master (async):
 - Receive incoming request data from client
 - Extract the first 1000 lines of data (3 for now)
 - Listen for workers to say HELLO!
-- 
+- Select 3 to 5 workers randomly
+
 ... to do ...
 
-- Send the first 1000 (3 for now) lines to worker 1
-- Send the next 1000 (3 for now) lines to worker 2
+- Send 1000 (3 for now) lines at a time to workers
+- Receives back from workers "word count"
 
 ... to do ....
 

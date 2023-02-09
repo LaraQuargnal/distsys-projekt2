@@ -2,6 +2,8 @@ import aiohttp
 from aiohttp import web
 import random
 
+MAX_WORKERS = 5
+
 routes = web.RouteTableDef()
 
 

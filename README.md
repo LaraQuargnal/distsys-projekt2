@@ -1,5 +1,6 @@
 # distsys-projekt2
 Master - Worker architecture
+[pokretanje svakog servisa u zasebnom terminalu: workers -> master -> client]
 
 constraints: asnycio, aiohttp, pandas, Python standard library
 

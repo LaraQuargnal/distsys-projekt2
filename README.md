@@ -4,9 +4,9 @@ Master - Worker architecture
 constraints: asnycio, aiohttp, pandas, Python standard library
 
 Client: 
-- create list of 10 000 clients (for now only 10)
+- create list of 10 000 clients (1000)
 - load data.json
-- take all python code (for now only 20 )
+- take all python code (10.000 )
 - divide the content evenly among clients
 - create a dictionary of client IDs and the lines assigned to each
 - for each client, count the average number of letters in python code and print
@@ -15,17 +15,15 @@ Client:
 
 Master (async):
 - Receive incoming request data from client
-- Extract the first 1000 lines of data (3 for now)
-- Listen for workers to say HELLO!
+- Listen for workers if they are ready
+- If a worker is ready, add it to the list of workers, assign ID based on port number
 - Select 3 to 5 workers randomly
-
-... to do ...
-
-- Send 1000 (3 for now) lines at a time to workers
+- send data to selected worker
+- start a timer for each task
+- Send 1000 (400) lines at a time to workers
 - Receives back from workers "word count"
-
-... to do ....
-
+- calculate the elapsed time between sent and received data from worker
+- print total number of completed task from each worker
 
 
 5 Workers:

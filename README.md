@@ -28,10 +28,10 @@ Master (async):
 
 
 
-Workers:
+5 Workers:
 - async
 - simulate delay, random 0.1-0.3 sec
-- count number of words in the received file
+- count number of words in the received file from master
 - simulate delay in sending the results
 - send result back to Master
 

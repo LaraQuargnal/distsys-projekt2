@@ -56,7 +56,7 @@ async def receive_data(request):
 
     return web.Response(status=200)
 
-app = web.Application()
+app = web.Application(client_max_size=1024 * 1024 * 200)
 app.add_routes(routes)
 # web.run_app(app, port=8083)  # For worker 1
 # web.run_app(app, port=8084)  # For worker 2

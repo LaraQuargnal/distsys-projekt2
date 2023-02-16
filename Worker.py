@@ -58,8 +58,18 @@ async def receive_data(request):
 
 app = web.Application(client_max_size=1024 * 1024 * 200)
 app.add_routes(routes)
-web.run_app(app, port=8083)  # For worker 1
-# web.run_app(app, port=8084)  # For worker 2
-# web.run_app(app, port=8085)  # For worker 3
-# web.run_app(app, port=8086)  # For worker 4
-# web.run_app(app, port=8087)  # For worker 5
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, required=True, help="Port number to run the worker on")
+    args = parser.parse_args()
+
+    web.run_app(app, port=args.port)
+    
+"""
+run in 5 separate terminals, specify 5 different ports, e.g.:
+python worker.py --port=8083
+python worker.py --port=8084
+python worker.py --port=8085
+python worker.py --port=8086
+python worker.py --port=8087
+"""
